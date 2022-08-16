@@ -1,0 +1,106 @@
+﻿@using locustrace.Client.Services
+
+@inject ISessionHandlerService SessionHandlerService
+@inject NavigationManager NavigationManager
+
+<nav class="navbar bg-white navbar-expand-md navbar-light mb-4 tf-border-bottom sticky-top">
+    <div class="container">
+        @if(imageData != null)
+        {
+        <a class="navbar-brand" href="#">
+            <img class="navbar-brand img" src="@imageData" alt="Locus Solutions Logo">
+            </a>
+        }
+        else
+        {
+        <a class="navbar-brand" href="#">
+            <img class="navbar-brand img" src="Content\Bilder\logo.png" alt="Locus Solutions Logo">
+        </a> 
+        }
+         <div class="hidden-xs collapse navbar-collapse navbar-left">
+       </div>
+        <button class="navbar-toggler @NavButtonCssClass" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                aria-controls="navbarCollapse" aria-label="Toggle navigation" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        @if (isLoggedIn)
+        {
+        <div class="collapse navbar-collapse justify-content-center @NavBarCssClass" id="navbarCollapse" @onclick="ToggleNavMenu">
+            <ul class="navbar-nav mb-2 mb-md-0 justify-content-center">
+                <li class="nav-item justify-content-center">
+                    <NavLink class="nav-link tf-darkblue-text" href="#">
+                        <span class="tf-darkblue-text">Search</span>
+                    </NavLink>
+                </li>
+            </ul>
+        
+            <ul class="navbar-nav mb-2 mb-md-0">
+                <li class="nav-item">
+                    <NavLink class="nav-link tf-darkblue-text" href="/profile">
+                        <span class="tf-darkblue-text">Profile</span>
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
+        <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse" @onclick="ToggleNavMenu">
+
+            <ul class="navbar-nav ms-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    <NavLink class="nav-link tf-lightblue-text" href="/profile">
+                        <span class="oi oi-person tf-darkblue-text"></span>
+                        <span class="tf-darkblue-text">@username</span>
+                        <button class="btn user-btn rounded tf-darkblue-text tf-darkblue-border" @onclick="LogOut">Logout</button>
+                    </NavLink>
+                </li>
+            </ul>
+        </div> 
+        }
+        else
+        {
+        <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse" @onclick="ToggleNavMenu">
+            <ul class="navbar-nav ms-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    <NavLink class="nav-link tf-lightblue-text" href="login">
+                        <button class="btn user-btn rounded tf-darkblue-text tf-darkblue-border m-0" aria-hidden="true">Login</button>
+                    </NavLink>
+                </li>
+            </ul>
+        </div>   
+        }
+        
+    </div>
+</nav>
+ 
+@code {
+    private bool collapseNavMenu = true;
+    private string? NavBarCssClass => collapseNavMenu ? null : "show";
+    private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
+    private string imageData;
+
+    public bool isLoggedIn;
+    public string username;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    //method to fetch logo (if exists) and check for current user state
+    protected override async Task OnInitializedAsync()
+    {
+        imageData = await SessionHandlerService.GetLogo();
+
+        isLoggedIn = await SessionHandlerService.GetUserState();
+        if (isLoggedIn)
+        {
+            username = await SessionHandlerService.GetUsername();
+        }
+    }
+
+    //ends session and removes information stored in session
+    public async void LogOut()
+    {
+        SessionHandlerService.EndSession();
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+}

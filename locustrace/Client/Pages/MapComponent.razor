@@ -1,0 +1,10 @@
+﻿@using locustrace.Shared
+
+    <!--div for map, called by the "initialize" js-function -->  
+    <div class="mb-2 mt-2" id="map" style="height:500px; width: 100%;"></div>
+
+@code {
+    //callback method to rerender the component if any changes occur
+    [Parameter]
+    public EventCallback<PrivateOrder> OnShowMap { get; set; }
+}

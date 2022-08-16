@@ -1,0 +1,21 @@
+﻿<!--libraries/nuget-packages/directories-->
+@using locustrace.Client.Services
+
+<!--dependecy injections-->
+@inject ITokenService TokenService
+
+<!--page adress-->
+@page "/"
+
+<PageTitle>TRACK AND TRACE | Locus Solutions</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <!--implements the order search component-->
+        <OrderSearchComponent></OrderSearchComponent>
+    </div>
+</div>
+
+@code {
+
+}

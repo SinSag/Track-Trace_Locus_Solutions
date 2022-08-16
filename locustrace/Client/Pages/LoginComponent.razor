@@ -1,0 +1,78 @@
+﻿<!--page adress-->
+@page "/login"
+
+<!--libraries/nuget-packages/directories-->
+@using locustrace.Shared
+@using locustrace.Client.Services
+@using System.Net.Http.Json
+@using System.Text.Json
+
+<!--dependecy injections-->
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+@inject ISessionHandlerService SessionHandlerService
+
+<!--login form start-->
+<EditForm Model="user" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <div class="d-grid gap-1 col- justify-content-center "> 
+        <h3 class="me-8">Login</h3>
+        <label class="me-6" for="username">  Username </label> 
+        <InputText id="username" @bind-Value="user.Username" class="oi-resize-width mb-2 mt-2" @onkeydown="KeyDown"></InputText>
+        <ValidationMessage For="(()=> user.Username)" />
+        <label class="me-6"for="password"> Password </label> 
+        <InputText id="password" @bind-Value="user.Password" class="oi-resize-width" type="password" @onkeydown="KeyDown"></InputText>
+        <ValidationMessage For="(()=> user.Password)" />
+        <button type="submit" class="btn btn-primary me-8 m-1">Login</button>
+    </div>
+</EditForm>
+<!--login form end-->
+
+<!--checks if any errors occurred while trying to log in-->
+@if(errorMessage != null)
+{
+    <div class="justify-content-center m-1 ">
+        <p class="tf-error text-center m-1">@errorMessage</p>
+    </div>
+}
+
+@code {
+    //creates a new object of type UserLogin
+    private UserLogin user = new UserLogin();                                                       
+
+    //variable to hold error response
+    public string errorMessage;
+
+    //method fired by onClick-event
+    public async Task<TokenValidation> HandleLogin()                                                
+    {
+        try
+        {
+            //calls the GetUserToken method with values from the form
+            var token = await UserService.GetUserToken(user.Username, user.Password);               
+
+            //calls the ValidateUserToken with the recieved token
+            var validatedToken = await UserService.ValidateUserToken(token.access_token);           
+
+            //calls the StartSession method with username and token
+            await SessionHandlerService.StartSession(validatedToken.sub, token.access_token);       
+
+            //navigates back to index and forceloads every component
+            NavigationManager.NavigateTo("/", forceLoad: true);                                     
+        }
+        //checks for ApplicationException
+        catch (ApplicationException)                                                                
+        {
+            errorMessage = "Wrong username or password. Please try again.";
+        }
+
+        //returns the validation response as a TokenValidation object
+        return UserService.valResult;
+    }
+
+    //resets error message when retyping credentials
+    public void KeyDown()
+    {
+        errorMessage = null;
+    }
+}

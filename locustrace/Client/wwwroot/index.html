@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>locustrace</title>
+    <base href="/" />
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <!-- Can't find path
+    <link href="locustrace.Client.styles.css" rel="stylesheet" />-->
+    <link href="manifest.json" rel="manifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+
+    <!--GOOGLE MAPS API KEY HAS BEEN REMOVED DUE TO SAFETY AND PRIVACY REASONS-->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key="></script>
+    <script src="mapScript.js"></script>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+
+</head>
+
+<body class="tf-grey">
+
+    <div class="tf-loading" id="app">
+        <img class="navbar-brand img tf-loading-img" src="Content\Bilder\logo.png" alt="Locus Solutions Logo">
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+</body>
+
+</html>

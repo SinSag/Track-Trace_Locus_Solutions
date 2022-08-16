@@ -1,0 +1,429 @@
+﻿<!--libraries/nuget-packages/directories-->
+@using System.Diagnostics
+@using Microsoft.AspNetCore.Authorization
+@using locustrace.Client.Services
+@using locustrace.Shared
+@using Microsoft.AspNetCore.Components.Authorization
+
+<!--dependecy injections-->
+@inject ITokenService TokenService
+@inject IOrderService OrderService
+@inject IVehicleService VehicleService
+@inject ISessionHandlerService SessionHandlerService
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService session
+@inject IJSRuntime JSRuntime
+
+<!--attributes-->
+@attribute [Authorize]
+
+<div class="d-flex flex-column bd-highlight mt-1" id="main-content">
+    <h1 class="text-center">Track your order!</h1>
+<!--search form start-->
+    <div class="d-flex justify-content-center">
+        <div class="d-flex justify-content-center input-group mt-1">
+            <input type="search" class="d-flex justify-content-center tf-form-control tf-darkblue-border-tlb rounded-start tf-input" @bind-value="orderSearch" @oninput="OnInputChange" placeholder="Order ID" aria-label="Search" aria-describedby="search-addon"/>
+            <button type=submit class="btn btn-tf tf-darkblue-border-trb d-flex justify-content-center" @onclick="() => Search(orderSearch)"> 
+                <span class="d-flex justify-content-center input-group-text tf-lightblue border-0" id="search-addon">
+                    <i class="oi oi-magnifying-glass tf-darkblue-color"></i>
+                </span>
+            </button>
+        </div>
+    </div>
+<!--search form end-->            
+
+@if(OrderService.openOrders == null && OrderService.privateOrders == null)
+{
+    <div class="d-flex justify-content-center mt-3">
+        <p>Please search for an order.</p>
+    </div>
+}
+else
+{
+    <!--table start-->
+        <div class="d-flex flex-column justify-content-center">   
+            <!--for displaying open orders-->
+            @foreach(var orders in OrderService.openOrders)
+            {
+                <div class="tableFixHead mt-3 d-flex justify-content-between tf-table-open">
+                    <table class="table-responsive">
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Order id</th>
+                            <td>@orders.orderId</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">External order id</th>
+                            <td>@orders.externOrderId</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Consignment number</th>
+                            <td>@orders.consignmentNo</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Collect date</th>
+                            <td>@orders.collectDate</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Collect latest date</th>
+                            <td>@orders.collectLatestDate</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Collect place</th>
+                            <td>@orders.collectPlaceName</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Collect postal code </th>
+                            <td>@orders.collectPlacePostalCode</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Collect postal district</th>
+                            <td>@orders.collectPlacePostalDistrict</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Collect country</th>
+                            <td>@orders.collectPlaceCountry</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Deliver date</th>
+                            <td>@orders.deliverDate</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Deliver latest date</th>
+                            <td>@orders.deliverLatestDate</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Deliver place</th>
+                            <td>@orders.deliverPlaceName</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Deliver postal code</th>
+                            <td>@orders.deliverPlacePostalCode</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Deliver postal district</th>
+                            <td>@orders.deliverPlacePostalDistrict</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Deliver country</th>
+                            <td>@orders.deliverPlaceCountry</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Quantity</th>
+                            <td>@orders.sumQuantity</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Weight</th>
+                            <td>@orders.sumWeight</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Volume</th>
+                            <td>@orders.sumVolume</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Pallets</th>
+                            <td>@orders.sumPallets</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Registered time</th>
+                            <td>@orders.registeredTime</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Time modified</th>
+                            <td>@orders.timeModified</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Time status</th>
+                            <td>@orders.timeStatus</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Parcel number</th>
+                            <td>@orders.parcelNumbers[0].parcelNumber</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Cargo line index</th>
+                            <td>@orders.parcelNumbers[0].cargoLineIndex</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Time status</th>
+                            <td>@orders.parcelNumbers[0].timeStatus</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Scanned</th>
+                            <td>@orders.parcelNumbers[0].isScanned</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Status</th>
+                            <td>@orders.parcelNumbers[0].status</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Sub status</th>
+                            <td>@orders.parcelNumbers[0].subStatus</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Load carrier number</th>
+                            <td>@orders.parcelNumbers[0].loadCarrierNo</td>
+                        </tr>
+                        <tr>
+                            <th class="tf-lightblue text-white align-middle">Set time status</th>
+                            <td>@orders.parcelNumbers[0].setTimeStatus</td>
+                        </tr>
+                    </table>
+                </div>
+            }
+        </div>
+            <!--limits the view to logged in/authorized users-->
+            <CascadingAuthenticationState>
+                <AuthorizeView> 
+                    <Authorized>
+                            <!--for displaying private orders-->
+                            @foreach(var orders in OrderService.privateOrders)
+                            {
+                                <div class="d-flex justify-content-center w-100">
+                                    <button class="btn btn-tf m-3" @onclick="() => ShowMap()">Show map</button>
+                                </div>
+                                <div class="d-flex flex-wrap justify-content-center">
+                                    <div class="d-flex justify-content-center mt-3 tf-table-private tableFixHead ">
+                                        
+                                            <table class="table-responsive">
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Order id</th>
+                                                    <td>@orders.orderId</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">External order id</th>
+                                                    <td>@orders.externOrderId</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Consignment number</th>
+                                                    <td>@orders.consignmentNo</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Customer name</th>
+                                                    <td>@orders.customerName</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Collect date</th>
+                                                    <td>@orders.collectDate</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Collect latest date</th>
+                                                    <td>@orders.collectLatestDate</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Collect place name</th>
+                                                    <td>@orders.collectPlaceName</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Collect place street</th>
+                                                    <td>@orders.collectPlaceStreet</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Collect place postal code</th>
+                                                    <td>@orders.collectPlacePostalCode</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Collect place postal district</th>
+                                                    <td>@orders.collectPlacePostalDistrict</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Collect place country</th>
+                                                    <td>@orders.collectPlaceCountry</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Collect place latitude</th>
+                                                    <td>@orders.collectPlaceLatitude</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Collect place longitude</th>
+                                                    <td>@orders.collectPlaceLongitude</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Deliver date</th>
+                                                    <td>@orders.deliverDate</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Deliver latest date</th>
+                                                    <td>@orders.deliverLatestDate</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Deliver place name</th>
+                                                    <td>@orders.deliverPlaceName</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Deliver place street</th>
+                                                    <td>@orders.deliverPlaceStreet</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Deliver place postal code</th>
+                                                    <td>@orders.deliverPlacePostalCode</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Deliver place postal district</th>
+                                                    <td>@orders.deliverPlacePostalDistrict</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Deliver place country</th>
+                                                    <td>@orders.deliverPlaceCountry</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Deliver place latitude</th>
+                                                    <td>@orders.deliverPlaceLatitude</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Deliver place longitude</th>
+                                                    <td>@orders.deliverPlaceLongitude</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">ETA collect</th>
+                                                    <td>@orders.etaCollect</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">ETA delivery</th>
+                                                    <td>@orders.etaDelivery</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Planned ETA collect</th>
+                                                    <td>@orders.plannedETACollect</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Planned ETA delivery</th>
+                                                    <td>@orders.plannedETADelivery</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Transport type</th>
+                                                    <td>@orders.transportType</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Trip id</th>
+                                                    <td>@orders.tripId</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Sum guantity</th>
+                                                    <td>@orders.sumQuantity</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Sum weight</th>
+                                                    <td>@orders.sumWeight</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Sum volume</th>
+                                                    <td>@orders.sumVolume</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Sum pallets</th>
+                                                    <td>@orders.sumPallets</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Registered time</th>
+                                                    <td>@orders.registeredTime</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Time modified</th>
+                                                    <td>@orders.timeModified</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Time status</th>
+                                                    <td>@orders.timeStatus</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Parcel number</th>
+                                                    <td>@orders.parcelNumbers[0].parcelNumber</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Cargo line index</th>
+                                                    <td>@orders.parcelNumbers[0].cargoLineIndex</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Time status</th>
+                                                    <td>@orders.parcelNumbers[0].timeStatus</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Is scanned</th>
+                                                    <td>@orders.parcelNumbers[0].isScanned</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Status</th>
+                                                    <td>@orders.parcelNumbers[0].status</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Sub status</th>
+                                                    <td>@orders.parcelNumbers[0].subStatus</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Load carrier number</th>
+                                                    <td>@orders.parcelNumbers[0].loadCarrierNo</td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="tf-lightblue text-white align-middle">Set time status</th>
+                                                    <td>@orders.parcelNumbers[0].setTimeStatus</td>
+                                                </tr>
+                                            </table>
+                                    </div>
+                                    <div class="tf-map">
+                                        <!--map component start-->
+                                        <MapComponent OnShowMap="ShowMap"></MapComponent>
+                                        <!--map component end-->
+                                    </div>
+                                </div> 
+                            }
+                    </Authorized>
+                </AuthorizeView>
+            </CascadingAuthenticationState>
+    <!--table end-->
+            <div class="d-flex justify-content-center">
+                <p>@errorMessage</p>
+            </div>
+}
+</div>
+
+@code{
+    public string orderSearch = "";
+    public string errorMessage;
+
+    //search method fired by onClick-event
+    public async Task Search(string orderSearch)                                
+    {
+        //gets user state
+        var isLoggedIn = await SessionHandlerService.GetUserState();
+
+        try
+        {
+            //checks whether the user is logged in or not and executes the suitable method
+            if (isLoggedIn)                                                                     
+            {
+                //gets usertoken stored in session, then fetches information about order and vehicle
+                //as we have no testdata corresponding to the trip id from recieved orders, we are currently using the placeholder "7" just to demonstrate the usage of the GetVehicleInformation method
+                string token = await session.GetItemAsStringAsync("token");                     
+                await OrderService.GetTrackingInformation(orderSearch, token);             
+                await VehicleService.GetVehicleInformation(7, token);
+            }
+            else                                                                               
+            {
+                //calls the open tracking information method, open to all users
+                await OrderService.GetOpenTrackingInformation(orderSearch);       
+            }
+        }
+        //catches the application exception for empty search
+        catch(ApplicationException)
+        {
+            errorMessage = "No orders found.";
+        }
+    }
+
+    //method initializing the map with the necessary parameters
+    public async void ShowMap()
+    {
+        //takes the order object and vehicle object and passes the necessary members as parameters
+        var orders = OrderService.privateOrders;
+        var vehicles = VehicleService.vehicles;
+        await JSRuntime.InvokeVoidAsync("initialize", orders[0].deliverPlaceLatitude , orders[0].deliverPlaceLongitude, orders[0].deliverPlaceName, orders[0].collectPlaceLatitude, orders[0].collectPlaceLongitude, orders[0].collectPlaceName, vehicles[0].latitude, vehicles[0].longitude, vehicles[0].regNo);
+        StateHasChanged();
+    }
+
+    //removes error message when retyping
+    public void OnInputChange()
+    {
+        errorMessage = "";
+    }
+}
+  
